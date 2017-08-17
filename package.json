@@ -1,0 +1,19 @@
+{
+  "name": "mrch",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modulesio/mrch.git"
+  },
+  "author": "Avaer Kazmer <a@modules.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modulesio/mrch/issues"
+  },
+  "homepage": "https://github.com/modulesio/mrch#readme"
+}
