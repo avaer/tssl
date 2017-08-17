@@ -310,7 +310,7 @@ var edgeTable= new Uint32Array([
 
 
 
-exports.marchingCubes = function(dims, potential, bounds) {
+function marchingCubes(dims, potential, bounds) {
   if(!bounds) {
     bounds = [[0,0,0], dims];
   }
@@ -321,11 +321,13 @@ exports.marchingCubes = function(dims, potential, bounds) {
     shift[i] = bounds[0][i];
   }
 
-  var vertices = []
-    , faces = []
+  var positions = new Float32Array(500 * 1024)
+    , positionIndex = 0
+    , faces = new Uint32Array(500 * 1024)
+    , faceIndex = 0
     , n = 0
-    , grid = new Array(8)
-    , edges = new Array(12)
+    , grid = new Float32Array(8)
+    , edges = new Uint32Array(12)
     , x = [0,0,0];
   //March over the volume
   for(x[2]=0; x[2]<dims[2]-1; ++x[2], n+=dims[0])
@@ -351,7 +353,7 @@ exports.marchingCubes = function(dims, potential, bounds) {
       if((edge_mask & (1<<i)) === 0) {
         continue;
       }
-      edges[i] = vertices.length;
+      edges[i] = positionIndex / 3;
       var nv = [0,0,0]
         , e = edgeIndex[i]
         , p0 = cubeVerts[e[0]]
@@ -364,16 +366,24 @@ exports.marchingCubes = function(dims, potential, bounds) {
         t = a / d;
       }
       for(var j=0; j<3; ++j) {
-        nv[j] = scale[j] * ((x[j] + p0[j]) + t * (p1[j] - p0[j])) + shift[j];
+        positions[positionIndex + j] = scale[j] * ((x[j] + p0[j]) + t * (p1[j] - p0[j])) + shift[j];
       }
-      vertices.push(nv);
+      positionIndex += 3;
     }
     //Add faces
     var f = triTable[cube_index];
     for(var i=0; i<f.length; i += 3) {
-      faces.push([edges[f[i]], edges[f[i+1]], edges[f[i+2]]]);
+      faces[faceIndex] = edges[f[i]];
+      faces[faceIndex + 1] = edges[f[i+1]];
+      faces[faceIndex + 2] = edges[f[i+2]];
+      faceIndex += 3;
     }
   }
-  return { positions: vertices, cells: faces };
+  return {
+    positions: new Float32Array(positions.buffer, positions.byteOffset, positionIndex),
+    indices: new Uint32Array(faces.buffer, faces.byteOffset, faceIndex),
+  };
+}
+module.exports = {
+  marchingCubes,
 };
-
