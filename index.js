@@ -354,8 +354,7 @@ function marchingCubes(dims, potential, bounds) {
         continue;
       }
       edges[i] = positionIndex / 3;
-      var nv = [0,0,0]
-        , e = edgeIndex[i]
+      var e = edgeIndex[i]
         , p0 = cubeVerts[e[0]]
         , p1 = cubeVerts[e[1]]
         , a = grid[e[0]]
