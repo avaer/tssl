@@ -308,27 +308,30 @@ var edgeTable= new Uint32Array([
     ,[0,1,1]]
   , edgeIndex = [ [0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7] ];
 
-
+var shift = new Float32Array(3);
+var positions = new Float32Array(500 * 1024);
+var faces = new Uint32Array(500 * 1024);
+var grid = new Float32Array(8);
+var edges = new Uint32Array(12);
+var x = new Uint32Array(3);
 
 function marchingCubes(dims, potential, bounds) {
   if(!bounds) {
     bounds = [[0,0,0], dims];
   }
-  var scale     = [0,0,0];
-  var shift     = [0,0,0];
   for(var i=0; i<3; ++i) {
-    scale[i] = (bounds[1][i] - bounds[0][i]) / dims[i];
     shift[i] = bounds[0][i];
   }
 
-  var positions = new Float32Array(500 * 1024)
-    , positionIndex = 0
-    , faces = new Uint32Array(500 * 1024)
-    , faceIndex = 0
-    , n = 0
-    , grid = new Float32Array(8)
-    , edges = new Uint32Array(12)
-    , x = [0,0,0];
+  positions.fill(0);
+  var positionIndex = 0;
+  faces.fill(0);
+  var faceIndex = 0;
+  var n = 0;
+  grid.fill(0);
+  edges.fill(0);
+  x.fill(0);
+
   //March over the volume
   for(x[2]=0; x[2]<dims[2]-1; ++x[2], n+=dims[0])
   for(x[1]=0; x[1]<dims[1]-1; ++x[1], ++n)
@@ -338,9 +341,9 @@ function marchingCubes(dims, potential, bounds) {
     for(var i=0; i<8; ++i) {
       var v = cubeVerts[i]
         , s = potential(
-          scale[0]*(x[0]+v[0])+shift[0],
-          scale[1]*(x[1]+v[1])+shift[1],
-          scale[2]*(x[2]+v[2])+shift[2]);
+          (x[0]+v[0])+shift[0],
+          (x[1]+v[1])+shift[1],
+          (x[2]+v[2])+shift[2]);
       grid[i] = s;
       cube_index |= (s > 0) ? 1 << i : 0;
     }
@@ -365,7 +368,7 @@ function marchingCubes(dims, potential, bounds) {
         t = a / d;
       }
       for(var j=0; j<3; ++j) {
-        positions[positionIndex + j] = scale[j] * ((x[j] + p0[j]) + t * (p1[j] - p0[j])) + shift[j];
+        positions[positionIndex + j] = ((x[j] + p0[j]) + t * (p1[j] - p0[j])) + shift[j];
       }
       positionIndex += 3;
     }
